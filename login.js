@@ -8,24 +8,9 @@
  * NÃO modifica index.js.
  */
 
-/* ─── Estado da UI ──────────────────────────────── */
-let currentTab = 'login';
 
-/* ─── Troca de abas ─────────────────────────────── */
-function switchTab(tab) {
-    currentTab = tab;
 
-    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
-    document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
 
-    document.getElementById('formLogin').classList.toggle('hidden', tab !== 'login');
-    document.getElementById('formRegister').classList.toggle('hidden', tab !== 'register');
-
-    // Limpar erros ao trocar de aba
-    hideError('loginError');
-    hideError('regError');
-    hideSuccess();
-}
 
 /* ─── Mostrar / esconder erros ──────────────────── */
 function showError(id, msg) {
@@ -127,39 +112,7 @@ function handleLogin() {
 }
 
 /* ─── REGISTAR ──────────────────────────────────── */
-function handleRegister() {
-    hideError('regError');
-    hideSuccess();
 
-    const email  = document.getElementById('regEmail')?.value.trim();
-    const senha  = document.getElementById('regPassInput')?.value;
-    const conf   = document.getElementById('regPassConfirm')?.value;
-
-    if (!email)           return showError('regError', 'Insere o teu email.');
-    if (!senha)           return showError('regError', 'Insere uma palavra-passe.');
-    if (senha.length < 6) return showError('regError', 'A palavra-passe precisa de pelo menos 6 caracteres.');
-    if (senha !== conf)   return showError('regError', 'As palavras-passe não coincidem.');
-
-    if (typeof window.registrar !== 'function') {
-        return showError('regError', 'A carregar autenticação, tenta de novo em instantes.');
-    }
-
-    setLoading('regBtn', 'regSpinner', 'regBtnText', true);
-
-    _callWithFeedback(
-        () => window.registrar(email, senha),
-        () => {
-            setLoading('regBtn', 'regSpinner', 'regBtnText', false);
-            showSuccess('Conta criada! A redirecionar...');
-            setTimeout(() => { window.location.href = 'index.html'; }, 1400);
-        },
-        (err) => {
-            setLoading('regBtn', 'regSpinner', 'regBtnText', false);
-            const msg = err?.code ? translateFirebaseError(err.code) : (err?.message || 'Erro desconhecido.');
-            showError('regError', msg);
-        }
-    );
-}
 
 /* ─── Wrapper para capturar resultado do auth.js ── */
 /**
