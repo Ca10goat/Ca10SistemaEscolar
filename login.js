@@ -1,18 +1,8 @@
 /**
  * login.js — Ca10 OS Authentication UI
- * 
- * Depende de:
- *   - firebase.js  (inicializa window.firebaseApp)
- *   - auth.js      (expõe window.login e window.registrar)
- * 
- * NÃO modifica index.js.
+ * Apenas login. Sem registo.
  */
 
-
-
-
-
-/* ─── Mostrar / esconder erros ──────────────────── */
 function showError(id, msg) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -38,7 +28,6 @@ function hideSuccess() {
     if (el) el.classList.add('hidden');
 }
 
-/* ─── Estado de loading do botão ────────────────── */
 function setLoading(btnId, spinnerId, textId, loading) {
     const btn = document.getElementById(btnId);
     const spinner = document.getElementById(spinnerId);
@@ -49,7 +38,6 @@ function setLoading(btnId, spinnerId, textId, loading) {
     if (text) text.style.opacity = loading ? '0.5' : '1';
 }
 
-/* ─── Mostrar/ocultar password ──────────────────── */
 function togglePass(inputId, btn) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -58,25 +46,19 @@ function togglePass(inputId, btn) {
     btn.style.opacity = show ? '1' : '0.5';
 }
 
-/* ─── Tradução de erros Firebase ────────────────── */
 function translateFirebaseError(code) {
     const map = {
-        'auth/invalid-email':            'Email inválido.',
-        'auth/user-not-found':           'Nenhuma conta com este email.',
-        'auth/wrong-password':           'Palavra-passe incorreta.',
-        'auth/invalid-credential':       'Email ou palavra-passe incorretos.',
-        'auth/email-already-in-use':     'Este email já tem uma conta.',
-        'auth/weak-password':            'A palavra-passe é demasiado fraca (mínimo 6 caracteres).',
-        'auth/too-many-requests':        'Demasiadas tentativas. Tenta novamente mais tarde.',
-        'auth/network-request-failed':   'Erro de rede. Verifica a tua ligação.',
-        'auth/user-disabled':            'Esta conta foi desativada.',
-        'auth/operation-not-allowed':    'Login por email não está ativado.',
-        'auth/requires-recent-login':    'Por favor, entra novamente para continuar.',
+        'auth/invalid-email':          'Email inválido.',
+        'auth/user-not-found':         'Nenhuma conta com este email.',
+        'auth/wrong-password':         'Palavra-passe incorreta.',
+        'auth/invalid-credential':     'Email ou palavra-passe incorretos.',
+        'auth/too-many-requests':      'Demasiadas tentativas. Tenta mais tarde.',
+        'auth/network-request-failed': 'Erro de rede. Verifica a tua ligação.',
+        'auth/user-disabled':          'Esta conta foi desativada.',
     };
     return map[code] || 'Ocorreu um erro. Tenta novamente.';
 }
 
-/* ─── LOGIN ─────────────────────────────────────── */
 function handleLogin() {
     hideError('loginError');
     hideSuccess();
@@ -87,18 +69,11 @@ function handleLogin() {
     if (!email) return showError('loginError', 'Insere o teu email.');
     if (!senha)  return showError('loginError', 'Insere a tua palavra-passe.');
 
-    // Aguardar que firebase.js e auth.js estejam carregados
-    if (typeof window.login !== 'function') {
-        return showError('loginError', 'A carregar autenticação, tenta de novo em instantes.');
-    }
-
     setLoading('loginBtn', 'loginSpinner', 'loginBtnText', true);
 
-    // Substitui temporariamente o auth.js para capturar resultado
     _callWithFeedback(
         () => window.login(email, senha),
         () => {
-            // Sucesso → redirecionar
             setLoading('loginBtn', 'loginSpinner', 'loginBtnText', false);
             showSuccess('Login efetuado! A redirecionar...');
             setTimeout(() => { window.location.href = 'index.html'; }, 1200);
@@ -111,156 +86,73 @@ function handleLogin() {
     );
 }
 
-/* ─── REGISTAR ──────────────────────────────────── */
-
-
-/* ─── Wrapper para capturar resultado do auth.js ── */
-/**
- * auth.js usa .then/.catch internamente mas não retorna a Promise.
- * Aqui interceptamos onAuthStateChanged para detetar sucesso,
- * e adicionamos um listener temporário de erro via wrapper.
- *
- * Estratégia:
- *   1. Observar window.__authLastError (preenchido por patch abaixo)
- *   2. Observar mudança no estado de auth via polling rápido
- */
 function _callWithFeedback(action, onSuccess, onError) {
     window.__authLastError = null;
     window.__authExpectingChange = true;
 
-    // Timeout de segurança
     const timeout = setTimeout(() => {
         window.__authExpectingChange = false;
-        if (window.__authLastError) {
-            onError(window.__authLastError);
-        } else {
-            onError({ message: 'Tempo limite excedido. Verifica a tua ligação.' });
-        }
+        onError(window.__authLastError || { message: 'Tempo limite excedido.' });
     }, 10000);
 
-    // Listener de resultado
     window.__authOnResult = (user, err) => {
         if (!window.__authExpectingChange) return;
         window.__authExpectingChange = false;
         clearTimeout(timeout);
         window.__authOnResult = null;
-        if (err) {
-            onError(err);
-        } else if (user) {
-            onSuccess(user);
-        }
+        if (err) onError(err);
+        else if (user) onSuccess(user);
     };
 
     try { action(); } catch (e) { clearTimeout(timeout); onError(e); }
 }
 
-/* ─── Patch do auth.js (sem modificar o ficheiro) ─ */
-/**
- * Sobrescreve temporariamente as funções globais para capturar
- * erros e sucessos e devolvê-los à UI.
- * 
- * Aguarda que auth.js termine de carregar antes de fazer o patch.
- */
+/* ─── Patch: captura resultado do window.login ─── */
 (function patchAuth() {
-    // Aguarda que os módulos ES sejam carregados
     const check = setInterval(() => {
-        if (typeof window.login === 'function' && typeof window.registrar === 'function') {
+        if (typeof window.login === 'function') {
             clearInterval(check);
-            applyPatch();
+
+            window.login = function(email, senha) {
+                const { getAuth, signInWithEmailAndPassword } = window.__fbAuth || {};
+
+                if (!getAuth) {
+                    // Fallback sem patch
+                    onError({ message: 'Firebase Auth não carregado.' });
+                    return;
+                }
+
+                const auth = getAuth(window.firebaseApp);
+                signInWithEmailAndPassword(auth, email, senha)
+                    .then(cred => {
+                        if (window.__authOnResult) window.__authOnResult(cred.user, null);
+                    })
+                    .catch(err => {
+                        window.__authLastError = err;
+                        if (window.__authOnResult) window.__authOnResult(null, err);
+                    });
+            };
         }
     }, 80);
-
-    // Timeout máximo de 5s para patch
     setTimeout(() => clearInterval(check), 5000);
-
-    function applyPatch() {
-        const origLogin    = window.login;
-        const origRegistar = window.registrar;
-
-        window.login = function(email, senha) {
-            // Chama o firebase diretamente para capturar a promise
-            const { getAuth, signInWithEmailAndPassword } =
-                window.__fbAuth || {};
-
-            if (!getAuth) {
-                // Fallback: usa a versão original e escuta onAuthStateChanged
-                origLogin(email, senha);
-                _listenForAuthChange();
-                return;
-            }
-
-            const auth = getAuth(window.firebaseApp);
-            signInWithEmailAndPassword(auth, email, senha)
-                .then(cred => {
-                    if (window.__authOnResult) window.__authOnResult(cred.user, null);
-                })
-                .catch(err => {
-                    window.__authLastError = err;
-                    if (window.__authOnResult) window.__authOnResult(null, err);
-                });
-        };
-
-        window.registrar = function(email, senha) {
-            const { getAuth, createUserWithEmailAndPassword } =
-                window.__fbAuth || {};
-
-            if (!getAuth) {
-                origRegistar(email, senha);
-                _listenForAuthChange();
-                return;
-            }
-
-            const auth = getAuth(window.firebaseApp);
-            createUserWithEmailAndPassword(auth, email, senha)
-                .then(cred => {
-                    if (window.__authOnResult) window.__authOnResult(cred.user, null);
-                })
-                .catch(err => {
-                    window.__authLastError = err;
-                    if (window.__authOnResult) window.__authOnResult(null, err);
-                });
-        };
-    }
-
-    // Fallback: escuta mudança de estado via onAuthStateChanged
-    function _listenForAuthChange() {
-        const listenOnce = setInterval(() => {
-            if (!window.__fbAuth) return;
-            clearInterval(listenOnce);
-            const { getAuth, onAuthStateChanged } = window.__fbAuth;
-            const auth = getAuth(window.firebaseApp);
-            const unsub = onAuthStateChanged(auth, (user) => {
-                if (user && window.__authOnResult) {
-                    unsub();
-                    window.__authOnResult(user, null);
-                }
-            });
-        }, 100);
-    }
 })();
 
-/* ─── Expõe firebase-auth para o patch ──────────── */
-/**
- * Carrega firebase-auth para o namespace window.__fbAuth
- * para que o patch acima possa usar as funções diretamente.
- */
+/* ─── Carrega firebase-auth para o patch ─────── */
 (async function loadFbAuth() {
     try {
-        const mod = await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js");
-        window.__fbAuth = mod;
+        window.__fbAuth = await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js");
     } catch (e) {
-        console.warn('[login.js] Não foi possível carregar firebase-auth:', e);
+        console.warn('[login.js] firebase-auth não carregou:', e);
     }
 })();
 
-/* ─── Redirecionar se já está autenticado ────────── */
+/* ─── Redireciona se já está autenticado ─────── */
 (async function checkAlreadyLoggedIn() {
-    await new Promise(r => setTimeout(r, 300)); // aguarda firebase.js
+    await new Promise(r => setTimeout(r, 300));
     try {
         const { getAuth, onAuthStateChanged } =
             await import("https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js");
 
-        // Aguarda firebaseApp estar disponível
         let tries = 0;
         while (!window.firebaseApp && tries++ < 30) {
             await new Promise(r => setTimeout(r, 100));
@@ -269,13 +161,7 @@ function _callWithFeedback(action, onSuccess, onError) {
 
         const auth = getAuth(window.firebaseApp);
         const unsub = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                unsub();
-                // Já está logado → vai direto para o app
-                window.location.href = 'index.html';
-            }
+            if (user) { unsub(); window.location.href = 'index.html'; }
         });
-    } catch (e) {
-        // Sem bloqueio, continua na tela de login
-    }
+    } catch (e) {}
 })();

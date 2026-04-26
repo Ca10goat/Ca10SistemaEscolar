@@ -6,8 +6,6 @@ import {
 
 const auth = getAuth(window.firebaseApp);
 
-
-
 // LOGIN
 window.login = function(email, senha) {
   signInWithEmailAndPassword(auth, email, senha)
