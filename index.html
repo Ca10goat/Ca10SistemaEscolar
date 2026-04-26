@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ca10 OS - Gestão Escolar Premium</title>
+    <link href="index.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- =========================================
+         🖥️ TOPBAR PRINCIPAL
+    ========================================= -->
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="profile-btn" onclick="openProgressDashboard()" id="profileBtn">
+                <div class="p-av" id="topAv">😎</div>
+                <div class="p-info">
+                    <span class="p-name" id="topName">Carregando...</span>
+                    <span class="p-sub"><span id="topRankIcon">🥱</span>&nbsp;<span id="topRankName">Iniciante</span></span>
+                    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBarFill"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tri-tabs" id="triTabs"></div>
+
+        <div class="top-tools">
+            <button class="tool-btn" onclick="openModal('achievementsOverlay')" title="Conquistas">🏆<div class="badge-dot" id="achvBadge"></div></button>
+            <button class="tool-btn" onclick="openModal('calcOverlay')" title="Calculadora Científica">🧮</button>
+            <button class="tool-btn" onclick="openPlanner()" title="Agenda / Planner">📅<div class="badge-dot" id="plannerBadge"></div></button>
+            <button class="tool-btn" onclick="openSearch()" title="Pesquisa Global">🔍</button>
+            <button class="tool-btn" onclick="exportJSON()" title="Exportar Backup JSON">💾</button>
+            <button class="tool-btn" onclick="openConverter()" title="Conversor Universal de Unidades">📐</button>
+        </div>
+    </div>
+
+    <!-- =========================================
+         📋 CONTEÚDO PRINCIPAL
+    ========================================= -->
+    <div class="main">
+        <div class="year-strip">
+            <div id="yearChips" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
+            <button class="btn-outline" onclick="openModal('yearOverlay'); yMode='add';">+ Ano</button>
+            <button class="btn-outline" onclick="openModal('yearOverlay'); openEditYear();">⚙️ Ano</button>
+        </div>
+
+        <div class="sec-hdr" style="margin-top:20px;">
+            <h2>Central do Aluno</h2>
+        </div>
+        <div class="hub-grid" id="studentHub">
+            <!-- Renderizado dinamicamente pelo JS -->
+        </div>
+
+        <div class="sec-hdr" style="margin-top:40px;">
+            <h2>Horário / Grade de Aulas</h2>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-outline" id="gridToggleBtn" onclick="GRID.toggleVisibility()">Ocultar grade</button>
+                <div id="gridControls" style="display:flex; gap:10px;">
+                    <button class="btn-outline" onclick="GRID.addDay()">+ Dia</button>
+                    <button class="btn-outline" onclick="GRID.addTime()">+ Horário</button>
+                </div>
+            </div>
+        </div>
+        <div id="gridWrapper" style="transition: max-height 0.4s ease, opacity 0.4s ease, margin 0.4s ease; overflow: hidden; max-height: 1000px; opacity: 1;">
+            <div class="grid-table-container fade-slide-in">
+                <table class="schedule-grid" id="scheduleGrid">
+                    <!-- RENDERED DYNAMICALLY -->
+                </table>
+            </div>
+        </div>
+
+        <div class="sec-hdr" style="margin-top:40px;">
+            <h2>As Minhas Disciplinas</h2>
+            <button class="btn-acc" onclick="openAddSubject()">+ Nova Disciplina</button>
+        </div>
+
+        <div class="subjects" id="subjectsList"></div>
+    </div>
+
+    <div class="toast-container" id="toastBox"></div>
+
+    <!-- =========================================
+         🔔 LEVEL UP
+    ========================================= -->
+    <div class="overlay hidden" id="levelUpOverlay">
+        <div class="level-up-box">
+            <h2>LEVEL UP!</h2>
+            <div class="new-level" id="lvlUpNum">2</div>
+            <p style="color:var(--t2);margin-bottom:28px;font-size:15px; font-family: var(--f-sans)">A tua inteligência aumentou consideravelmente!</p>
+            <button class="btn-acc" style="width:100%;font-size:12px;padding:16px;" onclick="closeModal('levelUpOverlay')">Incrível!</button>
+        </div>
+    </div>
+
+    <!-- =========================================
+         👤 DASHBOARD DE PERFIL E PROGRESSO
+    ========================================= -->
+    <div class="overlay hidden" id="progressOverlay" onclick="closeModal('progressOverlay')">
+        <div class="modal" style="max-width:560px;" onclick="event.stopPropagation()">
+            <div class="dash-header">
+                <div class="dash-avatar" id="dashAv">😎</div>
+                <div style="flex:1">
+                    <h2 id="dashName" class="dash-name" style="font-size:26px;margin-bottom:8px;letter-spacing:1px;margin:0 0 8px 0;">Estudante</h2>
+                    <div class="dash-rank-badge" id="dashRankBadge" style="border-color:#a9abb3;color:#a9abb3;">🥱 Iniciante</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:30px;">
+                <h4 style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:15px;">Personalizar Avatar</h4>
+                <div id="dashAvatarSelector" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+            </div>
+
+            <div class="dash-xp-box">
+                <div style="display:flex;justify-content:space-between;margin-bottom:15px;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:500;">
+                    <span>Nível <span id="dashLevel">1</span></span>
+                    <span style="color:var(--t2);"><span id="dashXp">0</span> / <span id="dashTargetXp">100</span> XP</span>
+                </div>
+                <div class="xp-bar-bg"><div class="xp-bar-fill" id="dashXpFill"></div></div>
+            </div>
+
+            <div class="dash-grid">
+                <div class="dash-stat"><div class="dash-stat-val" id="dashStatTasks">0</div><div class="dash-stat-lbl">Tarefas</div></div>
+                <div class="dash-stat"><div class="dash-stat-val" id="dashStatNotes">0</div><div class="dash-stat-lbl">Anotações</div></div>
+                <div class="dash-stat"><div class="dash-stat-val" id="dashStatFiles">0</div><div class="dash-stat-lbl">Ficheiros</div></div>
+            </div>
+
+            <div style="border-top:1px solid var(--line);padding-top:30px;">
+                <h4 style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">Mudar Conta</h4>
+                <div id="dashProfList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;max-height:150px;overflow-y:auto;"></div>
+                <div style="display:flex;gap:10px;">
+                    <input type="text" id="newProfName" placeholder="Nome novo estudante..." style="flex:1;padding:12px;background:transparent;color:white;border:1px solid var(--line);outline:none;font-family:var(--f-sans);">
+                    <button class="btn-acc" style="padding:0 20px;white-space:nowrap;" onclick="saveNewProfile()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         🧮 CALCULADORA
+    ========================================= -->
+    <div class="overlay hidden" id="calcOverlay" onclick="closeModal('calcOverlay')">
+        <div class="calc-modal" onclick="event.stopPropagation()">
+            <div class="calc-display">
+                <div class="calc-history" id="calcHistory"></div>
+                <div class="calc-input" id="calcInput">0</div>
+            </div>
+            <div class="calc-grid">
+                <button class="btn-calc op" onclick="CALC.action('clear')">C</button>
+                <button class="btn-calc op" onclick="CALC.append('(')">(</button>
+                <button class="btn-calc op" onclick="CALC.append(')')">)</button>
+                <button class="btn-calc op" onclick="CALC.action('backspace')">⌫</button>
+                <button class="btn-calc op" onclick="CALC.append('**2')">x²</button>
+                <button class="btn-calc op" onclick="CALC.append('**')">xʸ</button>
+                <button class="btn-calc op" onclick="CALC.append('Math.sqrt(')">√</button>
+                <button class="btn-calc op" onclick="CALC.append('/')">÷</button>
+                <button class="btn-calc" onclick="CALC.append('7')">7</button>
+                <button class="btn-calc" onclick="CALC.append('8')">8</button>
+                <button class="btn-calc" onclick="CALC.append('9')">9</button>
+                <button class="btn-calc op" onclick="CALC.append('*')">×</button>
+                <button class="btn-calc" onclick="CALC.append('4')">4</button>
+                <button class="btn-calc" onclick="CALC.append('5')">5</button>
+                <button class="btn-calc" onclick="CALC.append('6')">6</button>
+                <button class="btn-calc op" onclick="CALC.append('-')">-</button>
+                <button class="btn-calc" onclick="CALC.append('1')">1</button>
+                <button class="btn-calc" onclick="CALC.append('2')">2</button>
+                <button class="btn-calc" onclick="CALC.append('3')">3</button>
+                <button class="btn-calc op" onclick="CALC.append('+')">+</button>
+                <button class="btn-calc op" onclick="CALC.append('%')">%</button>
+                <button class="btn-calc" onclick="CALC.append('0')">0</button>
+                <button class="btn-calc" onclick="CALC.append('.')">.</button>
+                <button class="btn-calc eq" onclick="CALC.calculate()">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         ❓ CONFIRMAÇÃO
+    ========================================= -->
+    <div class="overlay hidden" id="confirmOverlay" onclick="closeModal('confirmOverlay')">
+        <div class="modal" style="max-width:400px;text-align:center;" onclick="event.stopPropagation()">
+            <h3 id="confirmTitle" style="font-size:20px;margin-bottom:10px;">Tem a certeza?</h3>
+            <p id="confirmMessage" style="color:var(--text-mut);margin-bottom:25px;font-size:14px;">Esta ação não pode ser desfeita.</p>
+            <div style="display:flex;gap:15px;justify-content:center;">
+                <button class="btn-outline" style="flex:1" onclick="closeModal('confirmOverlay')">Cancelar</button>
+                <button class="btn-acc" style="flex:1;background:var(--bad);box-shadow:0 4px 15px rgba(239, 68, 68, 0.3);border-color:rgba(239, 68, 68, 0.5);" id="confirmOkBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         🏆 CONQUISTAS
+    ========================================= -->
+    <div class="overlay hidden" id="achievementsOverlay" onclick="closeModal('achievementsOverlay')">
+        <div class="modal" style="max-width:650px;" onclick="event.stopPropagation()">
+            <h3>As Tuas Conquistas</h3>
+            <p style="font-size:12px;color:var(--t2);margin-bottom:30px;">Completa tarefas, tira boas notas e estuda para desbloqueares tudo.</p>
+            <div class="achievements-grid" id="achievementsGrid"></div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         🔍 PESQUISA GLOBAL
+    ========================================= -->
+    <div class="overlay hidden" id="searchOverlay" onclick="closeModal('searchOverlay')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Pesquisa Global</h3>
+            <input type="text" class="search-input" id="gSearchInp" placeholder="Procurar matérias, anotações, tarefas ou ficheiros..." onkeyup="doGlobalSearch()">
+            <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <button class="btn-outline" style="padding:8px 15px;font-size:9px;" onclick="filterSearch('all')" id="sf_all">Tudo</button>
+                <button class="btn-outline" style="padding:8px 15px;font-size:9px;" onclick="filterSearch('disc')">🎯 Disciplinas</button>
+                <button class="btn-outline" style="padding:8px 15px;font-size:9px;" onclick="filterSearch('nota')">📝 Anotações</button>
+                <button class="btn-outline" style="padding:8px 15px;font-size:9px;" onclick="filterSearch('fich')">📎 Ficheiros</button>
+                <button class="btn-outline" style="padding:8px 15px;font-size:9px;" onclick="filterSearch('task')">📅 Tarefas</button>
+            </div>
+            <div id="searchResults" style="max-height:320px;overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         📅 CALENDÁRIO / PLANNER
+    ========================================= -->
+    <div class="overlay hidden" id="plannerOverlay" onclick="closeModal('plannerOverlay')">
+        <div class="modal" style="width: 95vw; max-width: 1000px; padding: 30px;" onclick="event.stopPropagation()">
+            
+            <div class="calendar-header" style="flex-wrap: wrap; gap: 15px;">
+                <div style="display:flex; align-items:center; gap:15px; flex-wrap: wrap;">
+                    <h3 style="margin:0;">O Teu Planner</h3>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="calendar-nav-btn" onclick="CALENDAR.prevMonth()">◀</button>
+                        <div id="calMonthYear" style="font-weight:600; font-size:16px; min-width:130px; text-align:center;">Agosto 2025</div>
+                        <button class="calendar-nav-btn" onclick="CALENDAR.nextMonth()">▶</button>
+                    </div>
+                </div>
+                <!-- Legenda do calendário e Nova Carga -->
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap: wrap;">
+                    <div style="display:flex; gap:10px; font-size:11px;">
+                        <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--bad);"></span> Prova</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--acc);"></span> Trabalho</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--ok);"></span> Lição</span>
+                    </div>
+                    <button class="btn-acc" style="padding:10px 20px;" onclick="CALENDAR.openTaskForm()">Nova Tarefa</button>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div style="display:flex; gap:10px; flex-wrap: wrap; margin-bottom: 20px;">
+                <select id="calFilterType" class="g-input" style="font-size:12px; font-weight:normal; width:auto; text-align:left;" onchange="CALENDAR.render()">
+                    <option value="all">Todos os Tipos</option>
+                    <option value="prova">Provas</option>
+                    <option value="trabalho">Trabalhos</option>
+                    <option value="lição">Lições</option>
+                    <option value="geral">Geral</option>
+                </select>
+                <select id="calFilterSubj" class="g-input" style="font-size:12px; font-weight:normal; width:auto; text-align:left;" onchange="CALENDAR.render()">
+                    <!-- options by render -->
+                </select>
+            </div>
+
+            <!-- View Principal do Calendário -->
+            <div id="calViewSpace" style="position:relative;">
+                <div id="calendarGrid" class="calendar-grid pop-in">
+                    <!-- Dias inseridos via JS -->
+                </div>
+            </div>
+
+            <!-- Formulário Embutido -->
+            <div id="newTaskForm" class="hidden" style="background:rgba(255,255,255,0.02);padding:30px;margin-top:20px;border:1px solid var(--line); border-radius:var(--radius-md);">
+                <h4 id="taskFormTitle" style="margin-top:0; margin-bottom: 20px;">Adicionar Tarefa</h4>
+                <div class="form-group"><input type="text" id="tTitle" placeholder="Título (Ex: Prova de Matemática)"></div>
+                
+                <div class="form-group" style="display:flex;gap:15px;flex-wrap:wrap;">
+                    <div style="flex:1;"><label>Data</label><input type="date" id="tDate"></div>
+                    <div style="flex:1;"><label>Disciplina</label><select id="tSubj"></select></div>
+                    <div style="flex:1;"><label>Tipo</label>
+                        <select id="tType">
+                            <option value="prova">Prova/Exame</option>
+                            <option value="trabalho">Trabalho/Projeto</option>
+                            <option value="lição">Lição de Casa/Estudo</option>
+                            <option value="geral">Geral</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;"><label>Estado</label>
+                        <select id="tStatus">
+                            <option value="pendente">Pendente</option>
+                            <option value="concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea id="tDesc" placeholder="Descrição / Notas da tarefa (Opcional)..." rows="3" style="width:100%; border:1px solid var(--line); background:var(--glass-bg); padding:10px; border-radius:var(--radius-sm); color:var(--text);"></textarea>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button class="btn-outline" style="color:var(--bad); border-color:var(--bad);" id="btnDelTask" onclick="CALENDAR.deleteEditingTask()" style="display:none;">Excluir Tarefa</button>
+                    <div style="display:flex; gap:10px; margin-left:auto;">
+                        <button class="btn-outline" onclick="CALENDAR.closeTaskForm()">Cancelar</button>
+                        <button class="btn-acc" style="padding:10px 25px;" onclick="CALENDAR.saveTask()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listagem Rápida em Modal para ver dia -->
+            <div id="dayTasksModal" class="hidden" style="background:rgba(255,255,255,0.03);padding:20px;margin-top:20px;border:1px solid var(--acc); border-radius:var(--radius-md);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <h4 id="dayTasksTitle" style="margin:0;color:var(--acc);">Tarefas do Dia</h4>
+                    <button class="btn-outline" style="border:none;background:transparent;font-size:16px;" onclick="document.getElementById('dayTasksModal').classList.add('hidden')">✕</button>
+                </div>
+                <div id="dayTasksList"></div>
+                <button class="btn-outline" style="width:100%; margin-top:15px;" onclick="CALENDAR.openTaskForm(CALENDAR.selectedDate)">+ Adicionar a este dia</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- =========================================
+         📆 ANO LETIVO
+    ========================================= -->
+    <div class="overlay hidden" id="yearOverlay" onclick="closeModal('yearOverlay')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="yModalTitle">Configurar Ano Letivo</h3>
+            <div class="form-group"><label>Ano</label><input type="number" id="yInput" placeholder="Ex: 2025"></div>
+            <div class="form-group"><label>Turma / Grau</label><input type="text" id="serieInput" placeholder="Ex: 10º Ano A"></div>
+            <div style="display:flex;gap:20px;background:transparent;padding:25px;border:1px solid var(--line);margin-bottom:20px;">
+                <div class="form-group" style="margin:0;flex:1"><label style="color:var(--t2)">Média Aprovação</label><input type="number" id="yPass" step="0.1" value="10"></div>
+                <div class="form-group" style="margin:0;flex:1"><label style="color:var(--t2)">Média Recuperação</label><input type="number" id="yRec" step="0.1" value="8"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('yearOverlay')">Cancelar</button>
+                <button class="btn-acc" onclick="saveYear()">Guardar Definições</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         📚 NOVA DISCIPLINA
+    ========================================= -->
+    <div class="overlay hidden" id="subjOverlay" onclick="closeModal('subjOverlay')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Nova Disciplina</h3>
+            <div class="form-group"><label>Nome da Matéria</label><input type="text" id="subjName" placeholder="Ex: Biologia"></div>
+            <div class="form-group"><label>Professor (Opcional)</label><input type="text" id="subjTeacher" placeholder="Ex: Prof. João"></div>
+            <div class="form-group">
+                <label>Cor de Identificação</label>
+                <div style="display:flex;gap:15px;flex-wrap:wrap;margin-top:15px;" id="colorRow"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="closeModal('subjOverlay')">Cancelar</button>
+                <button class="btn-acc" onclick="saveSubject()">Criar Disciplina</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualizador de imagem -->
+    <div class="overlay hidden" id="imageOverlay" onclick="closeModal('imageOverlay')">
+        <img id="previewImgSrc" src="" style="max-width:90vw;max-height:85vh;box-shadow:0 30px 80px rgba(0,0,0,0.9);object-fit:contain;transition:transform 0.5s;" onclick="event.stopPropagation()">
+    </div>
+
+    <!-- Input de ficheiro global -->
+    <input type="file" id="fInpGlobal" style="display:none" multiple accept="image/*,.pdf" capture="environment">
+
+    <!-- =========================================
+         🤖 ASSISTENTE IA
+    ========================================= -->
+    <div id="sai-container">
+        <button id="sai-fab" title="Assistente de Estudos IA">🧠</button>
+        <div id="sai-panel" class="sai-hidden">
+            <div id="sai-header">
+                <span style="font-family: var(--f-serif); font-size: 14px; text-transform:none;">Ca10 IA</span>
+                <button id="sai-close">✕</button>
+            </div>
+            <div id="sai-chat-body"></div>
+            <div id="sai-footer">
+                <input type="text" id="sai-input" placeholder="Pergunta sobre as tuas notas...">
+                <button id="sai-send">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         📐 CONVERSOR UNIVERSAL DE UNIDADES
+    ========================================= -->
+    <div class="overlay hidden" id="converterOverlay" onclick="closeModal('converterOverlay')">
+        <div class="modal conv-modal" onclick="event.stopPropagation()">
+            <h3>Conversor de Unidades</h3>
+
+            <div class="conv-cat-tabs">
+                <button class="conv-cat-btn active" id="convCat-length" onclick="CONV.setCategory('length')">
+                    <span class="cat-icon">📏</span>Comprimento
+                </button>
+                <button class="conv-cat-btn" id="convCat-mass" onclick="CONV.setCategory('mass')">
+                    <span class="cat-icon">⚖️</span>Massa
+                </button>
+                <button class="conv-cat-btn" id="convCat-temp" onclick="CONV.setCategory('temp')">
+                    <span class="cat-icon">🌡️</span>Temperatura
+                </button>
+            </div>
+
+            <div class="conv-row">
+                <div class="conv-col">
+                    <span class="conv-label">De</span>
+                    <select class="conv-select" id="convFromUnit" onchange="CONV.calculate()"></select>
+                    <input class="conv-input" type="number" id="convFromVal" placeholder="0" oninput="CONV.calculate()">
+                </div>
+
+                <button class="conv-swap-btn" onclick="CONV.swap()" title="Trocar unidades">⇄</button>
+
+                <div class="conv-col">
+                    <span class="conv-label">Para</span>
+                    <select class="conv-select" id="convToUnit" onchange="CONV.calculate()"></select>
+                    <input class="conv-input result-field" type="text" id="convToVal" placeholder="—" readonly>
+                </div>
+            </div>
+
+            <div class="conv-result-big">
+                <div class="conv-result-num" id="convResultNum">—</div>
+                <div class="conv-result-unit" id="convResultUnit"></div>
+            </div>
+
+            <div class="conv-formula-box">
+                <span class="formula-icon">💡</span>
+                <span class="conv-formula-text" id="convFormula">Seleciona um valor para ver a fórmula.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         ✏️ PROMPT MODAL
+    ========================================= -->
+    <div class="overlay hidden" id="promptOverlay" onclick="closeModal('promptOverlay')">
+        <div class="modal" style="max-width:400px;text-align:center;" onclick="event.stopPropagation()">
+            <h3 id="promptTitle" style="font-size:18px;margin-bottom:15px;">Título</h3>
+            <input type="text" id="promptInput" class="custom-input" style="width:100%;margin-bottom:20px;text-align:center;" autocomplete="off" onkeypress="if(event.key==='Enter') document.getElementById('promptOkBtn').click()">
+            <div style="display:flex;gap:15px;justify-content:center;">
+                <button class="btn-outline" style="flex:1" onclick="closeModal('promptOverlay')">Cancelar</button>
+                <button class="btn-acc" style="flex:1;" id="promptOkBtn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================
+         🖱️ CONTEXT MENU
+    ========================================= -->
+    <div id="ctxMenu" class="ctx-menu" style="display: none;"></div>
+
+    <script src="index.js"></script>
+      <script type="module" src="firebase.js"></script>       <!-- ← adiciona aqui -->
+    <script type="module" src="auth.js"></script>           <!-- ← adiciona aqui -->
+    <script type="module" src="auth-guard.js"></script>     <!-- ← adiciona aqui -->
+</body>
+</html>

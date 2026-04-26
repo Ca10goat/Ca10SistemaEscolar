@@ -1,0 +1,318 @@
+/* =============================================
+   LOGIN.CSS — Ca10 OS Auth Screen
+   Usa as variáveis CSS do index.css quando
+   disponíveis; define fallbacks próprios.
+============================================= */
+
+:root {
+    --auth-bg:      #0d0d0f;
+    --auth-card:    #141417;
+    --auth-line:    rgba(255,255,255,0.08);
+    --auth-acc:     #7c6ef5;
+    --auth-acc2:    #a78bfa;
+    --auth-t1:      #f0f0f2;
+    --auth-t2:      #7a7b82;
+    --auth-err:     #f07070;
+    --auth-ok:      #6ee7b7;
+    --auth-radius:  14px;
+    --f-sans:       'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ── FUNDO ────────────────────────────────── */
+.auth-body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--auth-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--f-sans, var(--f-sans));
+    overflow: hidden;
+    position: relative;
+}
+
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.auth-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.18;
+}
+
+.auth-orb-1 {
+    width: 500px;
+    height: 500px;
+    background: var(--auth-acc);
+    top: -120px;
+    right: -100px;
+    animation: orbFloat 8s ease-in-out infinite alternate;
+}
+
+.auth-orb-2 {
+    width: 400px;
+    height: 400px;
+    background: #3b82f6;
+    bottom: -100px;
+    left: -80px;
+    animation: orbFloat 10s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes orbFloat {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(30px, 20px) scale(1.05); }
+}
+
+/* ── CARD ─────────────────────────────────── */
+.auth-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    margin: 20px;
+    background: var(--auth-card);
+    border: 1px solid var(--auth-line);
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+    animation: cardIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── LOGO ─────────────────────────────────── */
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.auth-logo-icon {
+    font-size: 36px;
+    line-height: 1;
+}
+
+.auth-logo-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--auth-t1);
+    letter-spacing: 1px;
+}
+
+.auth-logo-sub {
+    font-size: 11px;
+    color: var(--auth-t2);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* ── ABAS ─────────────────────────────────── */
+.auth-tabs {
+    display: flex;
+    gap: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--auth-line);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+}
+
+.auth-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--auth-t2);
+    font-family: var(--f-sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.auth-tab.active {
+    background: var(--auth-acc);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(124,110,245,0.35);
+}
+
+.auth-tab:not(.active):hover {
+    color: var(--auth-t1);
+    background: rgba(255,255,255,0.06);
+}
+
+/* ── CAMPOS ───────────────────────────────── */
+.auth-field {
+    margin-bottom: 18px;
+}
+
+.auth-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--auth-t2);
+    margin-bottom: 8px;
+}
+
+.auth-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--auth-line);
+    border-radius: var(--auth-radius);
+    color: var(--auth-t1);
+    font-family: var(--f-sans);
+    font-size: 14px;
+    padding: 13px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+}
+
+.auth-input-wrap .auth-input {
+    padding-right: 44px;
+}
+
+.auth-input:focus {
+    border-color: var(--auth-acc);
+    box-shadow: 0 0 0 3px rgba(124,110,245,0.18);
+}
+
+.auth-input::placeholder {
+    color: var(--auth-t2);
+    opacity: 0.6;
+}
+
+.auth-eye {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    line-height: 1;
+}
+
+.auth-eye:hover { opacity: 1; }
+
+/* ── ERROS / SUCESSO ──────────────────────── */
+.auth-error {
+    font-size: 12px;
+    color: var(--auth-err);
+    background: rgba(240,112,112,0.1);
+    border: 1px solid rgba(240,112,112,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    animation: fadeIn 0.2s ease;
+}
+
+.auth-success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--auth-ok);
+    background: rgba(110,231,183,0.08);
+    border: 1px solid rgba(110,231,183,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+.auth-success-icon { font-size: 18px; }
+
+/* ── BOTÃO PRINCIPAL ──────────────────────── */
+.auth-btn {
+    width: 100%;
+    background: var(--auth-acc);
+    color: #fff;
+    border: none;
+    border-radius: var(--auth-radius);
+    font-family: var(--f-sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 14px;
+    cursor: pointer;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 6px 20px rgba(124,110,245,0.3);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.auth-btn:hover {
+    background: var(--auth-acc2);
+    box-shadow: 0 8px 28px rgba(124,110,245,0.4);
+}
+
+.auth-btn:active {
+    transform: scale(0.98);
+}
+
+.auth-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── SPINNER ──────────────────────────────── */
+.auth-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── UTILITÁRIOS ──────────────────────────── */
+.hidden { display: none !important; }
+
+/* ── RESPONSIVO ───────────────────────────── */
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 30px 24px;
+        border-radius: 16px;
+        margin: 16px;
+    }
+}
