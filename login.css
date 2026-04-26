@@ -117,42 +117,6 @@
     margin-top: 2px;
 }
 
-/* ── ABAS ─────────────────────────────────── */
-.auth-tabs {
-    display: flex;
-    gap: 0;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--auth-line);
-    border-radius: 10px;
-    padding: 4px;
-    margin-bottom: 28px;
-}
-
-.auth-tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--auth-t2);
-    font-family: var(--f-sans);
-    font-size: 13px;
-    font-weight: 500;
-    padding: 10px 16px;
-    border-radius: 7px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    letter-spacing: 0.3px;
-}
-
-.auth-tab.active {
-    background: var(--auth-acc);
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(124,110,245,0.35);
-}
-
-.auth-tab:not(.active):hover {
-    color: var(--auth-t1);
-    background: rgba(255,255,255,0.06);
-}
 
 /* ── CAMPOS ───────────────────────────────── */
 .auth-field {
