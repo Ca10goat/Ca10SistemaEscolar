@@ -25,11 +25,7 @@
             </div>
         </div>
 
-        <!-- ABAS LOGIN / REGISTAR -->
-        <div class="auth-tabs">
-            <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
-            <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Criar Conta</button>
-        </div>
+    
 
         <!-- FORMULÁRIO LOGIN -->
         <div id="formLogin">
@@ -65,19 +61,7 @@
             </button>
         </div>
 
-        <!-- FORMULÁRIO REGISTAR -->
-        <div id="formRegister" class="hidden">
-            <div class="auth-field">
-                <label class="auth-label">Email</label>
-                <input
-                    type="email"
-                    id="regEmail"
-                    class="auth-input"
-                    placeholder="o.teu@email.com"
-                    autocomplete="email"
-                    onkeypress="if(event.key==='Enter') document.getElementById('regPassInput').focus()"
-                >
-            </div>
+      
             <div class="auth-field">
                 <label class="auth-label">Palavra-passe</label>
                 <div class="auth-input-wrap">
