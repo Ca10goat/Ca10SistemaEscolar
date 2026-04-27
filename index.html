@@ -292,7 +292,8 @@
                 </div>
                 
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <button class="btn-outline" style="color:var(--bad); border-color:var(--bad);" id="btnDelTask" onclick="CALENDAR.deleteEditingTask()" style="display:none;">Excluir Tarefa</button>
+                    <!-- DEPOIS (correto — style único, display:none inicial via JS no openTaskForm) -->
+<button class="btn-outline" style="color:var(--bad); border-color:var(--bad); display:none;" id="btnDelTask" onclick="CALENDAR.deleteEditingTask()">Excluir Tarefa</button>
                     <div style="display:flex; gap:10px; margin-left:auto;">
                         <button class="btn-outline" onclick="CALENDAR.closeTaskForm()">Cancelar</button>
                         <button class="btn-acc" style="padding:10px 25px;" onclick="CALENDAR.saveTask()">Guardar</button>
