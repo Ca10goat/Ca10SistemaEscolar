@@ -36,15 +36,25 @@ function initDefaultProfile() {
     return { id: 'p1', name: 'Estudante', avatar: '😎', xp: 0, level: 1, planner: [], achievements: [], stats: { tasksDone: 0, notesCreated: 0, filesAdded: 0, tasksCreated: 0 }, cid: y.id, tri: 0, years: [y] };
 }
 
-function load() {
+async function load() {
+    // Tenta carregar do Firebase primeiro
+    if (typeof window.carregarDoFirebase === 'function') {
+        const remoto = await window.carregarDoFirebase();
+        if (remoto) {
+            DB = remoto;
+            // Actualiza também o localStorage como cache
+            try { localStorage.setItem('ca10_os_v9_master', JSON.stringify(DB)); } catch(e) {}
+            // Continua para o restante da inicialização (validações)
+            inicializarDB(); return;
+        }
+    }
+    // Fallback: localStorage
     try {
         const data = localStorage.getItem('ca10_os_v9_master');
         if (data) DB = JSON.parse(data);
-        else {
-            const old = localStorage.getItem('ca10_os_v3_premium') || localStorage.getItem('ca10_os_v8_final') || localStorage.getItem('ca10_os_v2') || localStorage.getItem('ca10_os_v1');
-            if (old) DB = JSON.parse(old);
-        }
+        else { ... } // resto do código original
     } catch (e) { console.error('Erro no load:', e); }
+    inicializarDB();
 
     if (!DB || !DB.profiles || !DB.profiles.length) DB = { activeProfile: 'p1', profiles: [initDefaultProfile()] };
     S = DB.profiles.find(p => p.id === DB.activeProfile) || DB.profiles[0];
@@ -96,7 +106,9 @@ function load() {
 function save() {
     try { localStorage.setItem('ca10_os_v9_master', JSON.stringify(DB)); }
     catch (e) { console.warn('Quota exceeded no localStorage'); }
-}
+    // Sincroniza com Firebase se utilizador estiver autenticado
+    if (typeof window.salvarNoFirebase === 'function') {
+        window.salvarNoFirebase(DB);
 
 function addXP(amount, msg) {
     if (!S) return;
