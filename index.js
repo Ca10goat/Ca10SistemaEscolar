@@ -111,7 +111,8 @@ function save() {
     // Sincroniza com Firebase se utilizador estiver autenticado
     if (typeof window.salvarNoFirebase === 'function') {
         window.salvarNoFirebase(DB);
-
+    }
+}      
 function addXP(amount, msg) {
     if (!S) return;
     S.xp += amount;
