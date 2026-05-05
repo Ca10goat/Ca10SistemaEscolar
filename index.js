@@ -52,7 +52,9 @@ async function load() {
     try {
         const data = localStorage.getItem('ca10_os_v9_master');
         if (data) DB = JSON.parse(data);
-        else { ... } // resto do código original
+       else {
+    DB = initDefaultProfile();
+}
     } catch (e) { console.error('Erro no load:', e); }
     inicializarDB();
 
