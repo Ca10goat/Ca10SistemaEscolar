@@ -2255,3 +2255,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.setProperty('--px', `${x}px`);
         document.body.style.setProperty('--py', `${y}px`);
     });
+    });
