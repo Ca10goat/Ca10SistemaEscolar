@@ -230,32 +230,7 @@ function render(forceStagger = false) {
     } catch (e) { 
         console.error('Erro no render:', e); 
     }
-}function render(forceStagger = false) {
-    if (!S) {
-        console.warn("S não carregado ainda");
-        return;
-    }
-
-    if (!window.hasRenderedOnce) { 
-        forceStagger = true; 
-        window.hasRenderedOnce = true; 
-    }
-    window.skipStagger = !forceStagger;
-
-    try { 
-        rTop(); 
-        rChips(); 
-        rGrid(); 
-        rTabs(); 
-        rHub(); 
-        rSubjects(); 
-        rAchievements(); 
-        checkAlerts(); 
-    } catch (e) { 
-        console.error('Erro no render:', e); 
-    }
 }
-
 function rTop() {
     document.getElementById('topName').textContent = S.name;
     document.getElementById('topAv').textContent = S.avatar || '😎';
