@@ -201,12 +201,59 @@ function calcSubjectAvg(gr) {
     if (trimestral !== null) { sum += trimestral; count++; }
     return count === 0 ? null : +(sum / count).toFixed(1);
 }
+function inicializarDB() {
+    if (!DB) DB = initDefaultProfile();
+    S = DB;
+}
 
 function render(forceStagger = false) {
-    if (!window.hasRenderedOnce) { forceStagger = true; window.hasRenderedOnce = true; }
+    if (!S) {
+        console.warn("S não carregado ainda");
+        return;
+    }
+
+    if (!window.hasRenderedOnce) { 
+        forceStagger = true; 
+        window.hasRenderedOnce = true; 
+    }
     window.skipStagger = !forceStagger;
-    try { rTop(); rChips(); rGrid(); rTabs(); rHub(); rSubjects(); rAchievements(); checkAlerts(); }
-    catch (e) { console.error('Erro no render:', e); }
+
+    try { 
+        rTop(); 
+        rChips(); 
+        rGrid(); 
+        rTabs(); 
+        rHub(); 
+        rSubjects(); 
+        rAchievements(); 
+        checkAlerts(); 
+    } catch (e) { 
+        console.error('Erro no render:', e); 
+    }
+}function render(forceStagger = false) {
+    if (!S) {
+        console.warn("S não carregado ainda");
+        return;
+    }
+
+    if (!window.hasRenderedOnce) { 
+        forceStagger = true; 
+        window.hasRenderedOnce = true; 
+    }
+    window.skipStagger = !forceStagger;
+
+    try { 
+        rTop(); 
+        rChips(); 
+        rGrid(); 
+        rTabs(); 
+        rHub(); 
+        rSubjects(); 
+        rAchievements(); 
+        checkAlerts(); 
+    } catch (e) { 
+        console.error('Erro no render:', e); 
+    }
 }
 
 function rTop() {
