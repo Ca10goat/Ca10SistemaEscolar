@@ -2191,11 +2191,11 @@ ALL_MODALS.forEach(id => {
     if (el) el.addEventListener('click', ev => { if (ev.target === el) closeModal(id); });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    load();
+document.addEventListener('DOMContentLoaded', async () => {
+    await load();   // 👈 ESSA LINHA É A CORREÇÃO
     render();
     SCHOOL_AI.init();
-    
+
     document.getElementById('subjOverlay').addEventListener('click', () => {
         if (document.getElementById('colorRow').innerHTML === '') rColorRow();
     });
